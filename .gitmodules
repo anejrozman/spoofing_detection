@@ -1,0 +1,3 @@
+[submodule "abides_core"]
+	path = abides_core
+	url = https://github.com/jpmorganchase/abides-jpmc-public
