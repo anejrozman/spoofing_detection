@@ -2,7 +2,7 @@
 
 ## Overview
 Research project applying Information Geometry to detect spoofing anomalies in Limit Order Books.
-Uses JP Morgan's ABIDES simulator to generate synthetic ground-truth data.
+Uses ABIDES simulator to generate synthetic ground-truth data.
 
 ## Setup
 1. Clone the repo:
@@ -11,8 +11,8 @@ Uses JP Morgan's ABIDES simulator to generate synthetic ground-truth data.
    `TODO`
 
 ## Directory Structure
-* `abides_core/`: JP Morgan ABIDES simulator (Submodule)
-* `agents/`: Custom trading agents (SpoofingAgent, etc.)
+* `abides_core/`: ABIDES simulator (Submodule)
+* `agents/`: Custom trading agents
 * `configs/`: Simulation configuration scripts
 * `geometric/`: Mathematics and detection logic
 * `notebooks/`: Jupyter notebooks for data analysis
