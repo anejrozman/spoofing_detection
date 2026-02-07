@@ -9,7 +9,7 @@
 #  Usage: This file is not meant to be run, it is here to be separated from the abides_core folder which
 #  is a cloned repository. To run the simulation move to the abides_core folder and run the following command
 # 
-#           TODO: write the command
+#     python abides.py -c normal_market_config_w_OBI_agents.py -t <TICKER> -d <HISTORICAL_DATE> -s <SEED> -l <LOG_DIRECTORY_NAME>
 # 
 
 import argparse
@@ -29,6 +29,7 @@ from agent.NoiseAgent import NoiseAgent
 from agent.ValueAgent import ValueAgent
 from agent.market_makers.AdaptiveMarketMakerAgent import AdaptiveMarketMakerAgent
 from agent.examples.MomentumAgent import MomentumAgent
+from agent.OrderBookImbalanceAgent import OrderBookImbalanceAgent
 from agent.execution.POVExecutionAgent import POVExecutionAgent
 from model.LatencyModel import LatencyModel
 
@@ -330,6 +331,21 @@ agents.extend(execution_agents)
 agent_types.extend("ExecutionAgent")
 agent_count += 1
 
+# 7. Order Book Imbalance Agent
+num_imbalance_agents = 20
+agents.extend([OrderBookImbalanceAgent(id=j,
+                                      name="ORDER_BOOK_IMBALANCE_AGENT_{}".format(j),
+                                      type="OrderBookImbalanceAgent",
+                                      symbol=symbol,
+                                      starting_cash=starting_cash,
+                                      log_orders=log_orders,
+                                      freq=100000000,
+                                      random_state=np.random.RandomState(seed=np.random.randint(low=0, high=2 ** 32,
+                                                                                                dtype='uint64')))
+               for j in range(agent_count, agent_count + num_imbalance_agents)])
+agent_count += num_imbalance_agents
+agent_types.extend("OrderBookImbalanceAgent")
+
 
 ########################################################################################################################
 ########################################### KERNEL AND OTHER CONFIG ####################################################
@@ -362,6 +378,27 @@ latency_model = LatencyModel(latency_model='deterministic',
                              random_state=latency_rstate,
                              kwargs=model_args
                              )
+
+# Modify the latency of Order Book Imbalance Agents, make it higher like the paper Learing Not to Spoof by Byrd
+# OBI range (last 20)
+obi_start = agent_count - 20
+exchange_id = 0  # Typical
+
+# OBI to exchange: 21-399μs ns
+for i in range(20):
+    obi_id = obi_start + i
+    lat_us = np.random.uniform(21, 399)
+    lat_ns = int(lat_us * 1000)
+    pairwise_latencies[obi_id, exchange_id] = pairwise_latencies[exchange_id, obi_id] = lat_ns
+
+# OBI-OBI: 20-100μs 
+for i in range(20):
+    for j in range(i+1, 20):
+        obi1, obi2 = obi_start + i, obi_start + j
+        lat_us = np.random.uniform(20, 100)
+        lat_ns = int(lat_us * 1000)
+        pairwise_latencies[obi1, obi2] = pairwise_latencies[obi2, obi1] = lat_ns
+
 # KERNEL
 
 kernel.runner(agents=agents,
