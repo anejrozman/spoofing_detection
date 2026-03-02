@@ -1,7 +1,6 @@
 # Geometric Spoofing Detection
 
 ## Overview
-**Master's Thesis Project**  
 This project utilizes **Information Geometry** to detect spoofing anomalies in Limit Order Books (LOB). It builds upon the ABIDES market simulator to model market dynamics and test detection algorithms.
 
 ## Setup
